@@ -7,17 +7,23 @@ import { StockFilters } from './components/StockFilters';
 import { StockDetailModal } from './components/StockDetailModal';
 import { LoadingSpinner } from './components/LoadingSpinner';
 import { Stock, StockFilters as Filters } from './types/stock';
+import { ScrollToTopButton } from './components/ScrollToTopButton';
 
 const queryClient = new QueryClient();
 
 const AppContent: React.FC = () => {
   const { data: stocks, isLoading, error } = useStocks();
+  // Debug: useStocks'tan gelen hisse senedi verisinin uzunluğunu kontrol et
+  console.log('useStocks tarafından alınan hisse senedi sayısı:', stocks ? stocks.length : 'Yükleniyor veya hata var');
+
   const [selectedStock, setSelectedStock] = useState<Stock | null>(null);
   const [isDark, setIsDark] = useState(false);
   const [filters, setFilters] = useState<Filters>({
     search: '',
     sector: '',
     belowBookValue: false,
+    priceToBookMax: undefined,
+    dividendYieldMin: undefined,
   });
 
   useEffect(() => {
@@ -65,17 +71,17 @@ const AppContent: React.FC = () => {
       'Sektör'
     ];
 
-    const csvData = filteredStocks.map(stock => [
-      stock.symbol,
-      stock.name,
-      stock.currentPrice,
-      stock.dailyChangePercent,
-      stock.marketCap,
-      stock.priceToBook,
-      stock.priceToEarnings || '',
-      stock.volume,
-      stock.dividendYield || '',
-      stock.sector
+    const csvData = filteredStocks.map(row => [
+      row.symbol,
+      row.name,
+      row.currentPrice,
+      row.dailyChangePercent,
+      row.marketCap,
+      row.priceToBook,
+      row.priceToEarnings || '',
+      row.volume,
+      row.dividendYield || '',
+      row.sector
     ]);
 
     const csvContent = [csvHeaders, ...csvData]
@@ -125,10 +131,8 @@ const AppContent: React.FC = () => {
             <div className="flex items-center gap-4">
               <div className="text-right">
                 <div className="text-sm text-slate-500 dark:text-slate-400">Son Güncelleme</div>
-                BIST Hisse Analiz Paneli
-                  {new Date().toLocaleString('tr-TR')}
-                </div>
-                Borsa İstanbul hisse senetleri analizi
+                {new Date().toLocaleString('tr-TR')}
+              </div>
               <div className="w-2 h-2 bg-green-500 rounded-full animate-pulse" />
             </div>
           </div>
@@ -163,6 +167,9 @@ const AppContent: React.FC = () => {
         isOpen={!!selectedStock}
         onClose={() => setSelectedStock(null)}
       />
+
+      {/* Scroll to Top Button */}
+      <ScrollToTopButton isDark={isDark} />
     </div>
   );
 };
