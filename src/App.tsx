@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useMemo } from 'react';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
-import { BarChart3, RefreshCw } from 'lucide-react';
+import { BarChart3, RefreshCw, ArrowUp } from 'lucide-react';
 import { useStocks } from './hooks/useStocks';
 import { StockService } from './services/stockService';
 import { StockTable } from './components/StockTable';
@@ -9,7 +9,6 @@ import { StockFilters } from './components/StockFilters';
 import { StockDetailModal } from './components/StockDetailModal';
 import { LoadingSpinner } from './components/LoadingSpinner';
 import { Stock, StockFilters as Filters } from './types/stock';
-import { ScrollToTopButton } from './components/ScrollToTopButton';
 
 const queryClient = new QueryClient();
 
@@ -23,6 +22,7 @@ const AppContent: React.FC = () => {
     sector: '',
     belowBookValue: false,
   });
+  const [showScrollToTop, setShowScrollToTop] = useState(false);
 
   const sectors = useMemo(() => {
     if (!stocks) return ['Tümü'];
@@ -45,6 +45,29 @@ const AppContent: React.FC = () => {
     setIsDark(shouldUseDark);
     document.documentElement.classList.toggle('dark', shouldUseDark);
   }, []);
+
+  useEffect(() => {
+    const handleScroll = () => {
+      if (window.scrollY > 200) {
+        setShowScrollToTop(true);
+      } else {
+        setShowScrollToTop(false);
+      }
+    };
+
+    window.addEventListener('scroll', handleScroll);
+
+    return () => {
+      window.removeEventListener('scroll', handleScroll);
+    };
+  }, []);
+
+  const handleScrollToTop = () => {
+    window.scrollTo({
+      top: 0,
+      behavior: 'smooth',
+    });
+  };
 
   const handleThemeToggle = () => {
     const newTheme = !isDark;
@@ -207,8 +230,16 @@ const AppContent: React.FC = () => {
         isOpen={!!selectedStock}
         onClose={() => setSelectedStock(null)}
       />
-      
-      <ScrollToTopButton />
+
+      {/* Scroll to Top Button */}
+      {showScrollToTop && (
+        <button
+          onClick={handleScrollToTop}
+          className="fixed bottom-8 right-8 bg-blue-600 text-white rounded-full p-2 hover:bg-blue-700 transition-colors"
+        >
+          <ArrowUp className="h-6 w-6" />
+        </button>
+      )}
     </div>
   );
 };
