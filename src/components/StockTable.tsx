@@ -24,9 +24,7 @@ export const StockTable: React.FC<StockTableProps> = ({ stocks, filters, onStock
   const [sorting, setSorting] = React.useState<SortingState>([]);
 
   const filteredData = useMemo(() => {
-    // Debug: Mevcut filtreleri ve hisse senedi sayısını kontrol et
-    console.log('StockTable - Mevcut filtreler:', filters);
-    const filtered = stocks.filter(stock => {
+    return stocks.filter(stock => {
       const matchesSearch = 
         stock.name.toLowerCase().includes(filters.search.toLowerCase()) ||
         stock.symbol.toLowerCase().includes(filters.search.toLowerCase());
@@ -45,8 +43,6 @@ export const StockTable: React.FC<StockTableProps> = ({ stocks, filters, onStock
 
       return matchesSearch && matchesSector && matchesPriceToBook && matchesDividendYield && matchesBelowBookValue;
     });
-    console.log('StockTable - Filtrelenmiş veri uzunluğu:', filtered.length);
-    return filtered;
   }, [stocks, filters]);
 
   const columns = useMemo(() => [
@@ -196,23 +192,19 @@ export const StockTable: React.FC<StockTableProps> = ({ stocks, filters, onStock
             ))}
           </thead>
           <tbody className="divide-y divide-slate-200 dark:divide-slate-700">
-            {table.getRowModel().rows.map((row) => {
-              // Debug: Her bir satırın render edilip edilmediğini kontrol et
-              console.log('StockTable - Satır render ediliyor:', row.original.symbol);
-              return (
-                <tr
-                  key={row.id}
-                  onClick={() => onStockClick(row.original)}
-                  className="hover:bg-slate-50 dark:hover:bg-slate-800 cursor-pointer transition-colors"
-                >
-                  {row.getVisibleCells().map((cell) => (
-                    <td key={cell.id} className="px-6 py-4 whitespace-nowrap">
-                      {flexRender(cell.column.columnDef.cell, cell.getContext())}
-                    </td>
-                  ))}
-                </tr>
-              );
-            })}
+            {table.getRowModel().rows.map((row) => (
+              <tr
+                key={row.id}
+                onClick={() => onStockClick(row.original)}
+                className="hover:bg-slate-50 dark:hover:bg-slate-800 cursor-pointer transition-colors"
+              >
+                {row.getVisibleCells().map((cell) => (
+                  <td key={cell.id} className="px-6 py-4 whitespace-nowrap">
+                    {flexRender(cell.column.columnDef.cell, cell.getContext())}
+                  </td>
+                ))}
+              </tr>
+            ))}
           </tbody>
         </table>
       </div>

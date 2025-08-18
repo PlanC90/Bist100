@@ -106,7 +106,7 @@ export const StockDetailModal: React.FC<StockDetailModalProps> = ({
                 <BarChart3 className="h-4 w-4 text-slate-500" />
                 <span className="text-sm text-slate-500 dark:text-slate-400">Piyasa Değeri</span>
               </div>
-              <div className="text-lg font-semibold text-slate-900 dark:text-slate-100">{formatLargeNumber(stock.marketCap)}</div>
+              <div className="text-lg font-semibold">{formatLargeNumber(stock.marketCap)}</div>
             </div>
 
             <div className="bg-slate-50 dark:bg-slate-800 rounded-lg p-4">
@@ -114,7 +114,7 @@ export const StockDetailModal: React.FC<StockDetailModalProps> = ({
                 <DollarSign className="h-4 w-4 text-slate-500" />
                 <span className="text-sm text-slate-500 dark:text-slate-400">Hacim</span>
               </div>
-              <div className="text-lg font-semibold text-slate-900 dark:text-slate-100">{formatLargeNumber(stock.volume)}</div>
+              <div className="text-lg font-semibold">{formatLargeNumber(stock.volume)}</div>
             </div>
 
             <div className="bg-slate-50 dark:bg-slate-800 rounded-lg p-4">
@@ -122,13 +122,13 @@ export const StockDetailModal: React.FC<StockDetailModalProps> = ({
                 <Calendar className="h-4 w-4 text-slate-500" />
                 <span className="text-sm text-slate-500 dark:text-slate-400">Sektör</span>
               </div>
-              <div className="text-lg font-semibold text-slate-900 dark:text-slate-100">{stock.sector}</div>
+              <div className="text-lg font-semibold">{stock.sector}</div>
             </div>
           </div>
 
           {/* Finansal Oranlar */}
           <div>
-            <h3 className="text-lg font-semibold mb-4 text-slate-900 dark:text-slate-100">Finansal Oranlar</h3>
+            <h3 className="text-lg font-semibold mb-4">Finansal Oranlar</h3>
             <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
               <div className="text-center">
                 <div className="text-sm text-slate-500 dark:text-slate-400 mb-1">F/DD</div>
@@ -195,13 +195,13 @@ export const StockDetailModal: React.FC<StockDetailModalProps> = ({
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 text-sm">
               <div>
                 <span className="text-slate-500 dark:text-slate-400">Dolaşımdaki Pay:</span>
-                <span className="ml-2 font-medium text-slate-900 dark:text-slate-100">
+                <span className="ml-2 font-medium">
                   {stock.floatPercent ? formatPercentage(stock.floatPercent) : '-'}
                 </span>
               </div>
               <div>
                 <span className="text-slate-500 dark:text-slate-400">Son Güncelleme:</span>
-                <span className="ml-2 font-medium text-slate-900 dark:text-slate-100">
+                <span className="ml-2 font-medium">
                   {new Date(stock.lastUpdate).toLocaleString('tr-TR')}
                 </span>
               </div>

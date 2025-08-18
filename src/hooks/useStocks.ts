@@ -1,19 +1,21 @@
 import { useQuery } from '@tanstack/react-query';
 import { Stock } from '../types/stock';
-import { mockStocks } from '../data/mockData';
+import { StockService } from '../services/stockService';
 
-// Simulated API call - replace with real API
 const fetchStocks = async (): Promise<Stock[]> => {
-  // Simulate network delay
-  await new Promise(resolve => setTimeout(resolve, 1000));
-  return mockStocks;
+  const stockService = StockService.getInstance();
+  return stockService.fetchStocks();
 };
 
 export const useStocks = () => {
   return useQuery({
     queryKey: ['stocks'],
     queryFn: fetchStocks,
-    refetchInterval: 30000, // Refetch every 30 seconds
-    staleTime: 10000, // Consider data stale after 10 seconds
+    refetchInterval: 15 * 60 * 1000, // Her 15 dakikada bir güncelle
+    staleTime: 10 * 60 * 1000, // 10 dakika sonra stale kabul et
+    retry: 3, // Hata durumunda 3 kez dene
+    retryDelay: 5000, // 5 saniye bekle
+    refetchOnWindowFocus: false, // Pencere odaklandığında yenileme yapma
+    refetchOnMount: true, // Mount olduğunda yenile
   });
 };

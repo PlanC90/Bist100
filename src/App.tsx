@@ -1,7 +1,9 @@
 import React, { useState, useEffect } from 'react';
+import { useMemo } from 'react';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
-import { BarChart3 } from 'lucide-react';
+import { BarChart3, RefreshCw } from 'lucide-react';
 import { useStocks } from './hooks/useStocks';
+import { StockService } from './services/stockService';
 import { StockTable } from './components/StockTable';
 import { StockFilters } from './components/StockFilters';
 import { StockDetailModal } from './components/StockDetailModal';
@@ -12,19 +14,28 @@ import { ScrollToTopButton } from './components/ScrollToTopButton';
 const queryClient = new QueryClient();
 
 const AppContent: React.FC = () => {
-  const { data: stocks, isLoading, error } = useStocks();
-  // Debug: useStocks'tan gelen hisse senedi verisinin uzunluğunu kontrol et
-  console.log('useStocks tarafından alınan hisse senedi sayısı:', stocks ? stocks.length : 'Yükleniyor veya hata var');
-
+  const { data: stocks, isLoading, error, refetch } = useStocks();
   const [selectedStock, setSelectedStock] = useState<Stock | null>(null);
   const [isDark, setIsDark] = useState(false);
+  const [isRefreshing, setIsRefreshing] = useState(false);
   const [filters, setFilters] = useState<Filters>({
     search: '',
     sector: '',
     belowBookValue: false,
-    priceToBookMax: undefined,
-    dividendYieldMin: undefined,
   });
+
+  const sectors = useMemo(() => {
+    if (!stocks) return ['Tümü'];
+    const uniqueSectors = Array.from(new Set(stocks.map(stock => stock.sector)));
+    return ['Tümü', ...uniqueSectors.sort()];
+  }, [stocks]);
+
+  // Debug için veri durumunu logla
+  useEffect(() => {
+    console.log('Stocks data:', stocks);
+    console.log('Is loading:', isLoading);
+    console.log('Error:', error);
+  }, [stocks, isLoading, error]);
 
   useEffect(() => {
     const savedTheme = localStorage.getItem('theme');
@@ -71,17 +82,17 @@ const AppContent: React.FC = () => {
       'Sektör'
     ];
 
-    const csvData = filteredStocks.map(row => [
-      row.symbol,
-      row.name,
-      row.currentPrice,
-      row.dailyChangePercent,
-      row.marketCap,
-      row.priceToBook,
-      row.priceToEarnings || '',
-      row.volume,
-      row.dividendYield || '',
-      row.sector
+    const csvData = filteredStocks.map(stock => [
+      stock.symbol,
+      stock.name,
+      stock.currentPrice,
+      stock.dailyChangePercent,
+      stock.marketCap,
+      stock.priceToBook,
+      stock.priceToEarnings || '',
+      stock.volume,
+      stock.dividendYield || '',
+      stock.sector
     ]);
 
     const csvContent = [csvHeaders, ...csvData]
@@ -95,14 +106,32 @@ const AppContent: React.FC = () => {
     link.click();
   };
 
+  const handleManualRefresh = async () => {
+    setIsRefreshing(true);
+    try {
+      await StockService.getInstance().refreshData();
+      await refetch();
+    } catch (error) {
+      console.error('Manuel yenileme hatası:', error);
+    } finally {
+      setIsRefreshing(false);
+    }
+  };
+
   if (error) {
     return (
       <div className="min-h-screen bg-slate-100 dark:bg-slate-900 flex items-center justify-center">
         <div className="text-center">
           <div className="text-red-500 text-xl mb-2">Hata!</div>
           <div className="text-slate-600 dark:text-slate-400">
-            Veriler yüklenirken bir hata oluştu.
+            Veriler yüklenirken bir hata oluştu: {error.message}
           </div>
+          <button 
+            onClick={handleManualRefresh}
+            className="mt-4 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700"
+          >
+            Tekrar Dene
+          </button>
         </div>
       </div>
     );
@@ -120,18 +149,28 @@ const AppContent: React.FC = () => {
               </div>
               <div>
                 <h1 className="text-2xl font-bold text-slate-900 dark:text-slate-100">
-                  BIST 100 Analiz Paneli
+                  BIST Hisse Analiz Paneli
                 </h1>
                 <p className="text-sm text-slate-500 dark:text-slate-400">
-                  Türkiye'nin en büyük 100 şirketi
+                  Gerçek Zamanlı BIST Verileri ({stocks?.length || 0} hisse)
                 </p>
               </div>
             </div>
             
             <div className="flex items-center gap-4">
+              <button
+                onClick={handleManualRefresh}
+                disabled={isRefreshing}
+                className="flex items-center gap-2 px-3 py-2 text-sm bg-blue-600 text-white rounded-lg hover:bg-blue-700 disabled:opacity-50 transition-colors"
+              >
+                <RefreshCw className={`h-4 w-4 ${isRefreshing ? 'animate-spin' : ''}`} />
+                Yenile
+              </button>
               <div className="text-right">
                 <div className="text-sm text-slate-500 dark:text-slate-400">Son Güncelleme</div>
-                {new Date().toLocaleString('tr-TR')}
+                <div className="text-sm font-medium text-slate-700 dark:text-slate-300">
+                  {new Date().toLocaleString('tr-TR')}
+                </div>
               </div>
               <div className="w-2 h-2 bg-green-500 rounded-full animate-pulse" />
             </div>
@@ -146,6 +185,7 @@ const AppContent: React.FC = () => {
         onExportCSV={handleExportCSV}
         isDark={isDark}
         onThemeToggle={handleThemeToggle}
+        sectors={sectors}
       />
 
       {/* Main Content */}
@@ -167,9 +207,8 @@ const AppContent: React.FC = () => {
         isOpen={!!selectedStock}
         onClose={() => setSelectedStock(null)}
       />
-
-      {/* Scroll to Top Button */}
-      <ScrollToTopButton isDark={isDark} />
+      
+      <ScrollToTopButton />
     </div>
   );
 };

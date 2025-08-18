@@ -1,7 +1,6 @@
 import React from 'react';
 import { Search, Filter, Download, Moon, Sun } from 'lucide-react';
 import { StockFilters as Filters } from '../types/stock';
-import { sectors } from '../data/mockData';
 
 interface StockFiltersProps {
   filters: Filters;
@@ -9,6 +8,7 @@ interface StockFiltersProps {
   onExportCSV: () => void;
   isDark: boolean;
   onThemeToggle: () => void;
+  sectors: string[];
 }
 
 export const StockFilters: React.FC<StockFiltersProps> = ({
@@ -16,7 +16,8 @@ export const StockFilters: React.FC<StockFiltersProps> = ({
   onFiltersChange,
   onExportCSV,
   isDark,
-  onThemeToggle
+  onThemeToggle,
+  sectors
 }) => {
   return (
     <div className="bg-white dark:bg-slate-900 border-b border-slate-200 dark:border-slate-700 p-4">
@@ -93,9 +94,13 @@ export const StockFilters: React.FC<StockFiltersProps> = ({
 
           <button
             onClick={onThemeToggle}
-            className="p-2 rounded-lg border border-slate-300 dark:border-slate-600 hover:bg-slate-100 dark:hover:bg-slate-700 transition-colors"
+            className="p-2 rounded-lg border border-slate-300 dark:border-slate-600 hover:bg-slate-100 dark:hover:bg-slate-700 transition-colors bg-white dark:bg-slate-800"
           >
-            {isDark ? <Sun className="h-4 w-4" /> : <Moon className="h-4 w-4" />}
+            {isDark ? (
+              <Sun className="h-4 w-4 text-yellow-500" />
+            ) : (
+              <Moon className="h-4 w-4 text-slate-700" />
+            )}
           </button>
         </div>
       </div>
