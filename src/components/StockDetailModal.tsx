@@ -1,29 +1,5 @@
 import React from 'react';
-import { 
-  Dialog, 
-  DialogContent, 
-  DialogHeader, 
-  DialogTitle 
-} from './ui/Dialog';
-import { 
-  TrendingUp, 
-  TrendingDown, 
-  Calendar, 
-  DollarSign, 
-  BarChart3,
-  Award,
-  AlertTriangle
-} from 'lucide-react';
 import { Stock } from '../types/stock';
-import { 
-  formatCurrency, 
-  formatNumber, 
-  formatLargeNumber, 
-  formatPercentage, 
-  formatDate, 
-  isNearATH, 
-  isBelowBookValue 
-} from '../utils/formatters';
 
 interface StockDetailModalProps {
   stock: Stock | null;
@@ -31,184 +7,109 @@ interface StockDetailModalProps {
   onClose: () => void;
 }
 
-export const StockDetailModal: React.FC<StockDetailModalProps> = ({ 
-  stock, 
-  isOpen, 
-  onClose 
-}) => {
-  if (!stock) return null;
-
-  const isPositiveChange = stock.dailyChange >= 0;
-  const isBelow = isBelowBookValue(stock.currentPrice, stock.bookValue);
-  const isNear = isNearATH(stock.currentPrice, stock.allTimeHigh);
+export const StockDetailModal: React.FC<StockDetailModalProps> = ({ stock, isOpen, onClose }) => {
+  if (!isOpen || !stock) {
+    return null;
+  }
 
   return (
-    <Dialog open={isOpen} onOpenChange={onClose}>
-      <DialogContent className="max-w-2xl max-h-[80vh] overflow-y-auto">
-        <DialogHeader>
-          <DialogTitle className="flex items-center gap-3">
-            <div className="w-10 h-10 bg-gradient-to-br from-blue-500 to-purple-600 rounded-full flex items-center justify-center text-white font-bold">
-              {stock.symbol.slice(0, 2)}
-            </div>
-            <div>
-              <div className="text-xl font-bold">{stock.symbol}</div>
-              <div className="text-sm text-slate-500 font-normal">{stock.name}</div>
-            </div>
-          </DialogTitle>
-        </DialogHeader>
+    <div className="fixed inset-0 z-50 overflow-y-auto" aria-labelledby="modal-title" role="dialog" aria-modal="true">
+      <div className="flex items-end justify-center min-h-screen px-4 pt-4 pb-20 text-center sm:block sm:p-0">
+        {/* Background overlay, when the modal is open */}
+        <div className="fixed inset-0 transition-opacity" aria-hidden="true">
+          <div className="absolute inset-0 bg-gray-500 dark:bg-slate-800 opacity-75"></div>
+        </div>
 
-        <div className="space-y-6">
-          {/* Fiyat ve Değişim */}
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-            <div className="bg-slate-50 dark:bg-slate-800 rounded-lg p-4">
-              <div className="flex items-center justify-between">
-                <div>
-                  <div className="text-sm text-slate-500 dark:text-slate-400">Mevcut Fiyat</div>
-                  <div className={`text-2xl font-bold ${isBelow ? 'text-amber-600 dark:text-amber-400' : 'text-slate-900 dark:text-slate-100'}`}>
-                    {formatCurrency(stock.currentPrice)}
-                  </div>
-                </div>
-                <div className="flex items-center gap-2">
-                  {isBelow && (
-                    <AlertTriangle className="h-5 w-5 text-amber-500" title="Defter Değeri Altında" />
-                  )}
-                  {isNear && (
-                    <Award className="h-5 w-5 text-blue-500" title="ATH'a Yakın" />
-                  )}
-                </div>
-              </div>
-            </div>
+        {/* This element is to trick the browser into centering the modal contents. */}
+        <span className="hidden sm:inline-block sm:align-middle sm:h-screen" aria-hidden="true">&#8203;</span>
 
-            <div className="bg-slate-50 dark:bg-slate-800 rounded-lg p-4">
-              <div className="flex items-center justify-between">
-                <div>
-                  <div className="text-sm text-slate-500 dark:text-slate-400">Günlük Değişim</div>
-                  <div className={`text-xl font-bold ${isPositiveChange ? 'text-green-600' : 'text-red-600'}`}>
-                    {formatPercentage(stock.dailyChangePercent)}
-                  </div>
-                  <div className={`text-sm ${isPositiveChange ? 'text-green-600' : 'text-red-600'}`}>
-                    {formatCurrency(stock.dailyChange)}
-                  </div>
-                </div>
-                {isPositiveChange ? (
-                  <TrendingUp className="h-6 w-6 text-green-600" />
-                ) : (
-                  <TrendingDown className="h-6 w-6 text-red-600" />
-                )}
-              </div>
-            </div>
-          </div>
-
-          {/* Temel Bilgiler */}
-          <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
-            <div className="bg-slate-50 dark:bg-slate-800 rounded-lg p-4">
-              <div className="flex items-center gap-2 mb-2">
-                <BarChart3 className="h-4 w-4 text-slate-500" />
-                <span className="text-sm text-slate-500 dark:text-slate-400">Piyasa Değeri</span>
-              </div>
-              <div className="text-lg font-semibold">{formatLargeNumber(stock.marketCap)}</div>
-            </div>
-
-            <div className="bg-slate-50 dark:bg-slate-800 rounded-lg p-4">
-              <div className="flex items-center gap-2 mb-2">
-                <DollarSign className="h-4 w-4 text-slate-500" />
-                <span className="text-sm text-slate-500 dark:text-slate-400">Hacim</span>
-              </div>
-              <div className="text-lg font-semibold">{formatLargeNumber(stock.volume)}</div>
-            </div>
-
-            <div className="bg-slate-50 dark:bg-slate-800 rounded-lg p-4">
-              <div className="flex items-center gap-2 mb-2">
-                <Calendar className="h-4 w-4 text-slate-500" />
-                <span className="text-sm text-slate-500 dark:text-slate-400">Sektör</span>
-              </div>
-              <div className="text-lg font-semibold">{stock.sector}</div>
-            </div>
-          </div>
-
-          {/* Finansal Oranlar */}
-          <div>
-            <h3 className="text-lg font-semibold mb-4">Finansal Oranlar</h3>
-            <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
-              <div className="text-center">
-                <div className="text-sm text-slate-500 dark:text-slate-400 mb-1">F/DD</div>
-                <div className={`text-lg font-bold ${stock.priceToBook < 1 ? 'text-amber-600 dark:text-amber-400' : 'text-slate-900 dark:text-slate-100'}`}>
-                  {formatNumber(stock.priceToBook)}
-                </div>
-              </div>
-              
-              <div className="text-center">
-                <div className="text-sm text-slate-500 dark:text-slate-400 mb-1">F/K</div>
-                <div className="text-lg font-bold text-slate-900 dark:text-slate-100">
-                  {stock.priceToEarnings ? formatNumber(stock.priceToEarnings) : '-'}
-                </div>
-              </div>
-              
-              <div className="text-center">
-                <div className="text-sm text-slate-500 dark:text-slate-400 mb-1">Defter Değeri</div>
-                <div className="text-lg font-bold text-slate-900 dark:text-slate-100">
-                  {formatCurrency(stock.bookValue)}
-                </div>
-              </div>
-              
-              <div className="text-center">
-                <div className="text-sm text-slate-500 dark:text-slate-400 mb-1">Temettü</div>
-                <div className="text-lg font-bold text-slate-900 dark:text-slate-100">
-                  {stock.dividendYield ? formatPercentage(stock.dividendYield) : '-'}
+        {/* Modal panel */}
+        <div className="inline-block align-bottom bg-white dark:bg-slate-900 rounded-lg text-left overflow-hidden shadow-xl transform transition-all sm:my-8 sm:align-middle sm:max-w-lg sm:w-full">
+          <div className="bg-white dark:bg-slate-900 px-4 pt-5 pb-4 sm:p-6 sm:pb-4">
+            <div className="sm:flex sm:items-start">
+              <div className="mt-3 text-center sm:mt-0 sm:ml-4 sm:text-left">
+                <h3 className="text-lg leading-6 font-medium text-gray-900 dark:text-slate-100" id="modal-title">
+                  {stock.name} ({stock.symbol})
+                </h3>
+                <div className="mt-2">
+                  <p className="text-sm text-gray-500 dark:text-slate-400">
+                    Sektör: {stock.sector}
+                  </p>
                 </div>
               </div>
             </div>
           </div>
-
-          {/* Fiyat Aralığı */}
-          <div>
-            <h3 className="text-lg font-semibold mb-4">Fiyat Aralığı</h3>
-            <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
-              <div className="bg-blue-50 dark:bg-blue-900/20 rounded-lg p-4">
-                <div className="text-sm text-blue-600 dark:text-blue-400 mb-1">Tüm Zamanlar En Yüksek</div>
-                <div className="text-lg font-bold text-blue-700 dark:text-blue-300">
-                  {formatCurrency(stock.allTimeHigh)}
-                </div>
-                <div className="text-xs text-blue-500 dark:text-blue-400">
-                  {formatDate(stock.allTimeHighDate)}
-                </div>
+          <div className="border-t border-gray-200 dark:border-slate-700">
+            <dl>
+              <div className="bg-gray-50 dark:bg-slate-800 px-4 py-3 sm:grid sm:grid-cols-3 sm:gap-4 sm:px-6">
+                <dt className="text-sm font-medium text-gray-500 dark:text-slate-300">
+                  Mevcut Fiyat
+                </dt>
+                <dd className="mt-1 text-sm text-gray-900 dark:text-slate-100 sm:mt-0 sm:col-span-2">
+                  {stock.currentPrice} TL
+                </dd>
               </div>
-              
-              <div className="bg-green-50 dark:bg-green-900/20 rounded-lg p-4">
-                <div className="text-sm text-green-600 dark:text-green-400 mb-1">52 Hafta Yüksek</div>
-                <div className="text-lg font-bold text-green-700 dark:text-green-300">
-                  {formatCurrency(stock.fiftyTwoWeekHigh)}
-                </div>
+              <div className="bg-white dark:bg-slate-900 px-4 py-3 sm:grid sm:grid-cols-3 sm:gap-4 sm:px-6">
+                <dt className="text-sm font-medium text-gray-500 dark:text-slate-300">
+                  Günlük Değişim
+                </dt>
+                <dd className="mt-1 text-sm text-gray-900 dark:text-slate-100 sm:mt-0 sm:col-span-2">
+                  {stock.dailyChangePercent}%
+                </dd>
               </div>
-              
-              <div className="bg-red-50 dark:bg-red-900/20 rounded-lg p-4">
-                <div className="text-sm text-red-600 dark:text-red-400 mb-1">52 Hafta Düşük</div>
-                <div className="text-lg font-bold text-red-700 dark:text-red-300">
-                  {formatCurrency(stock.fiftyTwoWeekLow)}
-                </div>
+              <div className="bg-gray-50 dark:bg-slate-800 px-4 py-3 sm:grid sm:grid-cols-3 sm:gap-4 sm:px-6">
+                <dt className="text-sm font-medium text-gray-500 dark:text-slate-300">
+                  Piyasa Değeri
+                </dt>
+                <dd className="mt-1 text-sm text-gray-900 dark:text-slate-100 sm:mt-0 sm:col-span-2">
+                  {stock.marketCap}
+                </dd>
               </div>
-            </div>
+              <div className="bg-white dark:bg-slate-900 px-4 py-3 sm:grid sm:grid-cols-3 sm:gap-4 sm:px-6">
+                <dt className="text-sm font-medium text-gray-500 dark:text-slate-300">
+                  F/DD (Fiyat/Defter Değeri)
+                </dt>
+                <dd className="mt-1 text-sm text-gray-900 dark:text-slate-100 sm:mt-0 sm:col-span-2">
+                  {stock.priceToBook}
+                </dd>
+              </div>
+              <div className="bg-gray-50 dark:bg-slate-800 px-4 py-3 sm:grid sm:grid-cols-3 sm:gap-4 sm:px-6">
+                <dt className="text-sm font-medium text-gray-500 dark:text-slate-300">
+                  F/K (Fiyat/Kazanç)
+                </dt>
+                <dd className="mt-1 text-sm text-gray-900 dark:text-slate-100 sm:mt-0 sm:col-span-2">
+                  {stock.priceToEarnings}
+                </dd>
+              </div>
+              <div className="bg-white dark:bg-slate-900 px-4 py-3 sm:grid sm:grid-cols-3 sm:gap-4 sm:px-6">
+                <dt className="text-sm font-medium text-gray-500 dark:text-slate-300">
+                  Hacim
+                </dt>
+                <dd className="mt-1 text-sm text-gray-900 dark:text-slate-100 sm:mt-0 sm:col-span-2">
+                  {stock.volume}
+                </dd>
+              </div>
+              <div className="bg-gray-50 dark:bg-slate-800 px-4 py-3 sm:grid sm:grid-cols-3 sm:gap-4 sm:px-6">
+                <dt className="text-sm font-medium text-gray-500 dark:text-slate-300">
+                  Temettü Verimi
+                </dt>
+                <dd className="mt-1 text-sm text-gray-900 dark:text-slate-100 sm:mt-0 sm:col-span-2">
+                  {stock.dividendYield}
+                </dd>
+              </div>
+            </dl>
           </div>
-
-          {/* Ek Bilgiler */}
-          <div className="border-t border-slate-200 dark:border-slate-700 pt-4">
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 text-sm">
-              <div>
-                <span className="text-slate-500 dark:text-slate-400">Dolaşımdaki Pay:</span>
-                <span className="ml-2 font-medium">
-                  {stock.floatPercent ? formatPercentage(stock.floatPercent) : '-'}
-                </span>
-              </div>
-              <div>
-                <span className="text-slate-500 dark:text-slate-400">Son Güncelleme:</span>
-                <span className="ml-2 font-medium">
-                  {new Date(stock.lastUpdate).toLocaleString('tr-TR')}
-                </span>
-              </div>
-            </div>
+          <div className="bg-gray-50 dark:bg-slate-900 px-4 py-3 sm:px-6 sm:flex sm:flex-row-reverse">
+            <button
+              type="button"
+              className="mt-3 w-full inline-flex justify-center rounded-md border border-gray-300 shadow-sm px-4 py-2 bg-white dark:bg-slate-700 text-base font-medium text-gray-700 dark:text-slate-300 hover:bg-gray-50 dark:hover:bg-slate-600 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 sm:mt-0 sm:ml-3 sm:w-auto sm:text-sm"
+              onClick={onClose}
+            >
+              Kapat
+            </button>
           </div>
         </div>
-      </DialogContent>
-    </Dialog>
+      </div>
+    </div>
   );
 };

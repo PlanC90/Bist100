@@ -40,10 +40,11 @@ const AppContent: React.FC = () => {
   useEffect(() => {
     const savedTheme = localStorage.getItem('theme');
     const prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
-    const shouldUseDark = savedTheme === 'dark' || (!savedTheme && prefersDark);
+    const shouldUseDark = savedTheme === 'dark' || (savedTheme !== 'light' && prefersDark);
     
-    setIsDark(shouldUseDark);
-    document.documentElement.classList.toggle('dark', shouldUseDark);
+    setIsDark(false);
+    localStorage.setItem('theme', 'light');
+    document.documentElement.classList.remove('dark');
   }, []);
 
   useEffect(() => {
@@ -143,7 +144,7 @@ const AppContent: React.FC = () => {
 
   if (error) {
     return (
-      <div className="min-h-screen bg-slate-100 dark:bg-slate-900 flex items-center justify-center">
+      <div className="min-h-screen bg-slate-100 bg-slate-100 dark:bg-slate-900 flex items-center justify-center">
         <div className="text-center">
           <div className="text-red-500 text-xl mb-2">Hata!</div>
           <div className="text-slate-600 dark:text-slate-400">
@@ -163,7 +164,7 @@ const AppContent: React.FC = () => {
   return (
     <div className="min-h-screen bg-slate-100 dark:bg-slate-900 transition-colors">
       {/* Header */}
-      <header className="bg-white dark:bg-slate-900 border-b border-slate-200 dark:border-slate-700 shadow-sm">
+      <header className="bg-white dark:bg-slate-800 border-b border-slate-200 dark:border-slate-700 shadow-sm">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4">
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-3">
