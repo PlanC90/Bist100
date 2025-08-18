@@ -1,5 +1,4 @@
-import React, { useState, useEffect } from 'react';
-import { useMemo } from 'react';
+import React, { useState, useEffect, useMemo } from 'react';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { BarChart3, RefreshCw, ArrowUp } from 'lucide-react';
 import { useStocks } from './hooks/useStocks';
@@ -241,6 +240,13 @@ const AppContent: React.FC = () => {
           <ArrowUp className="h-6 w-6" />
         </button>
       )}
+
+      {/* Footer */}
+      <footer className="bg-white dark:bg-slate-800 border-t border-slate-200 dark:border-slate-700 py-4 text-center">
+        <p className="text-xs text-slate-500 dark:text-slate-400">
+          Burada yer alan bilgiler yatırım tavsiyesi değildir. Veriler üçüncü parti kaynaklardan alınmaktadır.
+        </p>
+      </footer>
     </div>
   );
 };
